@@ -27,3 +27,6 @@ class TestRentalModels(TestCase):
         self.assertFalse(not landlord.can_change_vacancy)
         agent_user = User.objects.create(email="agent@email.com", password="foo")
         agent: Agent = Agent.objects.create(user=agent_user)
+        self.assertEqual(agent_user.email, "agent@email.com")
+        self.assertFalse(agent.can_change_price)
+        self.assertFalse(agent.can_change_vacancy)
