@@ -11,6 +11,9 @@ class Country(models.Model):
     name = models.CharField(max_length=255)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class State(models.Model):
     """
@@ -19,6 +22,9 @@ class State(models.Model):
     name = models.CharField(max_length=255)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
+    def __str__(self) -> str:
+        return self.name
+
 class LGA(models.Model):
     """
     Refers to the local government area where an apartment is found.
@@ -26,12 +32,18 @@ class LGA(models.Model):
     name = models.CharField(max_length=255)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
+    def __str__(self) -> str:
+        return self.name
+
 class City(models.Model):
     """
     Refers to the city where an apartment is found.
     """
     name = models.CharField(max_length=255)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Landlord(models.Model):
@@ -59,3 +71,26 @@ class Agent(models.Model):
 
     def __str__(self) -> str:
         return self.user.email
+
+class Apartment(models.Model):
+    """
+    Represents an an apartment. Currently of all kinds.
+    """
+    country = models.ForeignKey(Country, on_delete=models.PROTECT)
+    state = models.ForeignKey(State, on_delete=models.PROTECT)
+    lga = models.ForeignKey(LGA, on_delete=models.PROTECT, help_text="local government area")
+    city = models.ForeignKey(City, on_delete=models.PROTECT)
+    address = models.TextField(max_length=500)
+    description = models.TextField(max_length=700, null=True, blank=True)
+    price = models.DecimalField(max_digits=12, decimal_places=2)
+    landlord = models.ForeignKey(Landlord, on_delete=models.PROTECT, null=True, blank=True)
+    price_is_negotiable = models.BooleanField(default=True, help_text="can this price be negotiated")
+    number_of_rooms = models.PositiveIntegerField()
+    is_vacant = models.BooleanField(default=True)
+    longitude = models.CharField(max_length=255, null=True, blank=True)
+    lattitude = models.CharField(max_length=255, null=True, blank=True)
+    agent = models.ForeignKey(Agent, on_delete=models.PROTECT, null=True, blank=True)
+
+    def __str__(self) -> str:
+        address = str(self.address)[:15]
+        return f"{self.city} {address}"
