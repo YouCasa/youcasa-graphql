@@ -8,8 +8,8 @@ class Country(models.Model):
     """
     Refers to the country where an apartment is found.
     """
-    name = models.CharField(max_length=255)
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True)
+    country_code = models.CharField(max_length=3, null=True, blank=True, unique=True)
 
     def __str__(self) -> str:
         return self.name
@@ -19,8 +19,8 @@ class State(models.Model):
     """
     Refers to the state where an apartment is found.
     """
-    name = models.CharField(max_length=255)
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True)
+    country = models.ForeignKey(Country, on_delete=models.PROTECT)
 
     def __str__(self) -> str:
         return self.name
@@ -29,8 +29,8 @@ class LGA(models.Model):
     """
     Refers to the local government area where an apartment is found.
     """
-    name = models.CharField(max_length=255)
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True)
+    state = models.ForeignKey(State, on_delete=models.PROTECT)
 
     def __str__(self) -> str:
         return self.name
@@ -39,8 +39,8 @@ class City(models.Model):
     """
     Refers to the city where an apartment is found.
     """
-    name = models.CharField(max_length=255)
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True)
+    state = models.ForeignKey(State, on_delete=models.PROTECT)
 
     def __str__(self) -> str:
         return self.name
@@ -53,11 +53,14 @@ class Landlord(models.Model):
     # Has fields that determine whether the landlord can_change_price or can_change_vacancy of an apartment
     # this is intended to be used as services that can be taken away if the landlord owes us money.
     user = models.ForeignKey(User, on_delete=models.PROTECT)
+    first_name = models.CharField(max_length=255, null=True, blank=True)
+    phone = models.CharField(max_length=25, null=True, blank=True)
+    last_name = models.CharField(max_length=255, null=True, blank=True)
     can_change_price = models.BooleanField(default=True)
     can_change_vacancy = models.BooleanField(default=True)
 
     def __str__(self) -> str:
-        return self.user.email
+        return f"{self.first_name} {self.last_name}"
 
 
 class Agent(models.Model):
@@ -66,11 +69,14 @@ class Agent(models.Model):
     They should have the necessary permisions that can also be revoked if needed
     """
     user = models.ForeignKey(User, on_delete=models.PROTECT)
+    first_name = models.CharField(max_length=255, null=True, blank=True)
+    phone = models.CharField(max_length=25, null=True, blank=True)
+    last_name = models.CharField(max_length=255, null=True, blank=True)
     can_change_price = models.BooleanField(default=False)
     can_change_vacancy = models.BooleanField(default=False)
 
     def __str__(self) -> str:
-        return self.user.email
+        return f"{self.first_name} {self.last_name}"
 
 class Apartment(models.Model):
     """

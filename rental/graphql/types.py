@@ -1,7 +1,7 @@
 import graphene
 from graphene_django import DjangoObjectType
 
-from rental.models import LGA, Agent, Country, Landlord, State, City
+from rental.models import LGA, Agent, Apartment, Country, Landlord, State, City
 
 
 class CountryType(DjangoObjectType):
@@ -19,7 +19,7 @@ class CountryType(DjangoObjectType):
 
     def resolve_country_id(self, _):
         if isinstance(self, Country):
-            return self.id
+            return getattr(self, "id")
         return None
 
 
@@ -27,6 +27,7 @@ class StateType(DjangoObjectType):
     """
     State GraphQL object type.
     """
+    state_id = graphene.ID()
     class Meta:
         model = State
         field = ("name",)
@@ -34,6 +35,12 @@ class StateType(DjangoObjectType):
             "name": ["exact", "icontains", "istartswith"]
         }
         interfaces = (graphene.relay.Node, )
+
+    def resolve_state_id(self, _):
+        if isinstance(self, State):
+            return getattr(self, "id")
+        return None
+
 
 class LGAType(DjangoObjectType):
     """
@@ -59,6 +66,7 @@ class CityType(DjangoObjectType):
         }
         interfaces = (graphene.relay.Node, )
 
+
 class LandlordType(DjangoObjectType):
     """
     Landlord GraphQL object type.
@@ -75,28 +83,30 @@ class AgentType(DjangoObjectType):
         model = Agent
         field = ("user", "can_change_price", "can_change_vacancy")
 
-class Apartment(DjangoObjectType):
+class ApartmentType(DjangoObjectType):
     """
     Apartment GraphQL object type.
     """
-    fields = (
-        "country", "state",
-        "lga", "city", "address",
-        "description", "price", "landlord",
-        "price_is_negotiable", "number_of_rooms",
-        "is_vacant", "agent", "longitude", "lattitude"
-    )
-    filetr_fields = {
-        "country__id": ["exact"],
-        "is_vacant": ["exact"],
-        "price_is_negotiable": ["exact"],
-        "country__name": ["exact", "istartswith", "icontains"],
-        "state__id": ["exact"],
-        "state__name": ["exact", "istartswith", "icontains"],
-        "lga__id": ["exact"],
-        "lga__name": ["exact", "istartswith", "icontains"],
-        "address": ["exact", "istartswith", "icontains"],
-        "price": ["exact", "istartswith", "icontains"],
-        "description": ["exact", "istartswith", "icontains"],
-    }
-    interfaces = (graphene.relay.Node, )
+    class Meta:
+        model = Apartment
+        fields = (
+            "country", "state",
+            "lga", "city", "address",
+            "description", "price", "landlord",
+            "price_is_negotiable", "number_of_rooms",
+            "is_vacant", "agent", "longitude", "lattitude"
+        )
+        filetr_fields = {
+            "country__id": ["exact"],
+            "is_vacant": ["exact"],
+            "price_is_negotiable": ["exact"],
+            "country__name": ["exact", "istartswith", "icontains"],
+            "state__id": ["exact"],
+            "state__name": ["exact", "istartswith", "icontains"],
+            "lga__id": ["exact"],
+            "lga__name": ["exact", "istartswith", "icontains"],
+            "address": ["exact", "istartswith", "icontains"],
+            "price": ["exact", "istartswith", "icontains"],
+            "description": ["exact", "istartswith", "icontains"],
+        }
+        interfaces = (graphene.relay.Node, )
